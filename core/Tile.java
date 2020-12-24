@@ -1,18 +1,20 @@
+package core;
+
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class Tile extends Rectangle {
-    private Piece piece;
+    private PieceView piece;
 
     public boolean hasPiece(){
         return piece != null;
 
     }
-    public Piece getPiece(){
+    public PieceView getPiece(){
         return piece;
 
     }
-    public void setPiece(Piece p){
+    public void setPiece(PieceView p){
         this.piece = p;
     }
 

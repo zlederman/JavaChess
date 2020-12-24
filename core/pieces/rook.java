@@ -1,12 +1,15 @@
-package pieces;
+package core.pieces;
 
-import java.util.*;
+import core.MoveType;
+import core.suit;
+
+import java.util.ArrayList;
 
 
 
 public class rook implements piece {
     public rook(){}
-
+    public static final int COST = 5;
     @Override
     public ArrayList<String> getAvailableMoves(String[][] board, String coord) {
         int x = (int) coord.charAt(0);
@@ -40,10 +43,27 @@ public class rook implements piece {
         
     }
 
+
+
+
     @Override
-    public boolean isValid(String[][] board, String iCoord, String fCoor) {
-        // TODO Auto-generated method stub
-        return false;
+    public MoveType isValid(String[][] board, Integer[] coords){
+
+
+        int x0 = coords[0]; int y0 = coords[1];
+        int xf = coords[2]; int yf = coords[3];
+        suit suit0 = suit.getSuit(board[x0][y0]);
+        suit suitF = suit.getSuit(board[xf][yf]);
+
+        if(!core.board.onBoard(xf,yf)){
+            return MoveType.NONE;
+        }
+        if(x0 == xf || y0 == yf){
+            return  MoveType.eval(suit0, suitF);
+        }
+
+        return MoveType.NONE;
+
     }
 
     

@@ -1,3 +1,5 @@
+package core;
+
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Parent;
@@ -5,10 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -56,16 +55,19 @@ public class ChessApp extends Application {
     private Group pieceGroup = new Group();
 
     private Tile board[][] = new Tile[WIDTH][HEIGHT];
+    public core.board boardState = new core.board();
+
     private TableView tableView;
 
     private Parent createContent(){
+        //need to clean up initialization and gui stuff later...
         BorderPane root = new BorderPane();
-        Pane pane = new Pane();
+        StackPane pane = new StackPane();
         pane.setPrefSize(WIDTH*TILE_SIZE,HEIGHT * TILE_SIZE  );
-        root.setPrefSize(WIDTH*TILE_SIZE +250 , HEIGHT * TILE_SIZE );
-        root.autosize();
-        pane.getChildren().addAll(tileGroup,pieceGroup);
+        pane.setPrefSize(WIDTH*TILE_SIZE +250 , HEIGHT * TILE_SIZE );
         pane.autosize();
+        pane.getChildren().addAll(tileGroup,pieceGroup);
+
         HBox hBox = new HBox();
         VBox vBox = new VBox();
         Text coordX[] = new Text[8];
@@ -92,7 +94,8 @@ public class ChessApp extends Application {
 
         vBox.setSpacing(90);
         vBox.getChildren().addAll(coordY);
-
+        vBox.autosize();
+        hBox.autosize();
 
 
         root.setCenter(pane);
@@ -106,9 +109,10 @@ public class ChessApp extends Application {
             for(int j = 0; j < HEIGHT; j++){
 
                 Tile tile = new Tile((i + j) % 2 == 0,j,i);
+                tile.autosize();
                 tileGroup.getChildren().add(tile);
                 board[j][i] = tile;
-                Piece piece = null;
+                PieceView piece = null;
                 piece = makePiece(map(i,j),j, i);
                 if(piece != null ) {
                     tile.setPiece(piece);
@@ -122,30 +126,34 @@ public class ChessApp extends Application {
         return root;
 
     }
-    public MoveType tryMove(Piece piece, int newX, int newY){
+    public core.MoveType tryMove(PieceView piece, int newX, int newY){
         try{
             if(board[newX][newY].hasPiece() || !getTurn(piece.getType().pieceClass)){
-                return  MoveType.NONE;
+                return  core.MoveType.NONE;
             }
             int x0 = toBoard(piece.getOldX());
             int y0 = toBoard(piece.getOldY());
+            System.out.printf("init location: %d , %d \n",x0, y0);
+            System.out.printf("final location: %d , %d\n",newX, newY);
 
-            return MoveType.NORMAL;
+
+            return  boardState.updateBoard(boardState.getBoard(),y0, x0, newY, newX);
         }catch(Exception e){
-            return MoveType.NONE;
+            return core.MoveType.NONE;
         }
 
     }
+
 
     public int toBoard(double pixel){
         return (int) (pixel + TILE_SIZE/2) / TILE_SIZE;
     }
 
 
-    private Piece makePiece(PieceType type, int x, int y){
+    private PieceView makePiece(PieceType type, int x, int y){
 
         if(type != null){
-            Piece p = new Piece(type, x, y);
+            PieceView p = new PieceView(type, x, y);
             p.setOnMouseReleased((e)->{
                 int newX = toBoard(p.getLayoutX());
                 int newY = toBoard(p.getLayoutY());
@@ -158,12 +166,13 @@ public class ChessApp extends Application {
                         p.abort();
                         break;
                     case NORMAL :
-                        System.out.printf("current pos %d , %d ",newX,newY);
+                        System.out.printf("%s\n",boardState.getBoard().toString());
                         p.move(newX, newY);
                         board[x0][y0].setPiece(null);
                         board[newX][newY].setPiece(p);
                         changeTurn(type.pieceClass);
                         break;
+
                 }
 
             });

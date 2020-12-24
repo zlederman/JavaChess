@@ -1,8 +1,12 @@
-package pieces;
+package core.pieces;
+
+import core.MoveType;
+import core.suit;
 
 import java.util.ArrayList;
 
 public class bishop implements piece {
+    public static final int COST = 3;
     public bishop() {
     };
 
@@ -55,9 +59,22 @@ public class bishop implements piece {
     }
 
     @Override
-    public boolean isValid(String[][] board, String iCoord, String fCoord) {
-        // TODO Auto-generated method stub
-        return false;
+    public MoveType isValid(String[][] board, Integer[] coords) {
+        int x0 = coords[0]; int y0 = coords[1];
+        int xf = coords[2]; int yf = coords[3];
+
+        suit suit0 = suit.getSuit(board[x0][y0]);
+        suit suitF = suit.getSuit(board[xf][yf]);
+        System.out.printf("%s , %s",suit0.toString(), suitF.toString());
+        if(!core.board.onBoard(xf,yf)){
+
+            return MoveType.NONE;
+        }
+        if(Math.abs(xf - x0) == Math.abs(yf - y0)){
+
+           return  MoveType.eval(suit0, suitF);
+        }
+        return MoveType.NONE;
     }
 
 }

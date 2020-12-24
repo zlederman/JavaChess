@@ -1,3 +1,4 @@
+package core;
 
 public enum PieceType {
   wKing('k'),wQueen('q'), wBishop( 'b'),
@@ -15,7 +16,7 @@ public enum PieceType {
 
 
 
-   PieceType( char pieceClass) {
+  PieceType(char pieceClass) {
 
         this.pieceClass = pieceClass;
     }

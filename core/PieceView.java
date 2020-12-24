@@ -1,8 +1,10 @@
+package core;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 
-public class Piece extends StackPane {
+public class PieceView extends StackPane {
     private PieceType type;
     private double mouseX; private double mouseY;
     private double oldX; private double oldY;
@@ -17,7 +19,7 @@ public class Piece extends StackPane {
         return oldY;
     }
 
-    public Piece(PieceType type ,int x, int y) {
+    public PieceView(PieceType type , int x, int y) {
         this.type = type;
         move(x,y);
         Image img = new Image(ChessApp.fMap.get(type.pieceClass).toString());
@@ -30,7 +32,7 @@ public class Piece extends StackPane {
         setOnMousePressed((e)->{
             mouseX = e.getSceneX();
             mouseY = e.getSceneY();
-            System.out.printf("mouse location %d, %d\n", toBoard(mouseX), toBoard(mouseY));
+
         });
 
         setOnMouseDragged((e) ->  {
@@ -60,6 +62,7 @@ public class Piece extends StackPane {
     public int toBoard(double pixel){
         return (int) (pixel + ChessApp.TILE_SIZE/2) / ChessApp.TILE_SIZE;
     }
+
 
 }
 
