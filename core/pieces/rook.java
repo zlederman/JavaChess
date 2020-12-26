@@ -55,7 +55,7 @@ public class rook implements piece {
         suit suit0 = suit.getSuit(board[x0][y0]);
         suit suitF = suit.getSuit(board[xf][yf]);
 
-        if(!core.board.onBoard(xf,yf)){
+        if(!onBoard(xf,yf)){
             return MoveType.NONE;
         }
         if(x0 == xf || y0 == yf){
@@ -66,5 +66,14 @@ public class rook implements piece {
 
     }
 
-    
+    @Override
+    public  boolean onBoard(int x, int y) {
+        if (x < 0 || x >= 8) {
+            return false;
+        }
+        return y >= 0 && y < 8;
+    }
+
+
+
 }

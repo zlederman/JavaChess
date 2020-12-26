@@ -22,10 +22,10 @@ public class Tile extends Rectangle {
 
 
     public Tile(boolean light, int x, int y){
-        setWidth(ChessApp.TILE_SIZE);
-        setHeight(ChessApp.TILE_SIZE);
+        setWidth(GameView.TILE_SIZE);
+        setHeight(GameView.TILE_SIZE);
 
-        relocate(x * ChessApp.TILE_SIZE, y * ChessApp.TILE_SIZE);
+        relocate(x * GameView.TILE_SIZE, y * GameView.TILE_SIZE);
         setFill(light ? Color.valueOf("d7ceb2") : Color.valueOf("4c5760"));
     }
 

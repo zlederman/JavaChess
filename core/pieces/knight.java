@@ -54,7 +54,7 @@ public class knight implements piece {
         suit suitF = suit.getSuit(board[xf][yf]);
 
         //either the differnece between x0 - xf == 3 and y0 - yf == 1 || x0 - xf == 1 and y0 - yf == 3
-        if(!core.board.onBoard(xf,yf)) return MoveType.NONE;
+        if(!onBoard(xf,yf)) return MoveType.NONE;
 
         if(Math.abs(x0 - xf) == 2 && Math.abs(y0 - yf) == 1){
 
@@ -64,7 +64,18 @@ public class knight implements piece {
             return MoveType.eval(suit0,suitF);
         }
         return MoveType.NONE;
-    };
+    }
+
+    @Override
+    public  boolean onBoard(int x, int y) {
+        if (x < 0 || x >= 8) {
+            return false;
+        }
+        return y >= 0 && y < 8;
+    }
+
+
+
 
     private boolean getSuit(String piece){
         return piece.charAt(0) <= 90 && piece.charAt(0) >= 65 ? true : false;

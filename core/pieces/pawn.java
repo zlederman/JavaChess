@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class pawn implements piece {
     public static final int COST = 1;
-    
+
     public pawn() {
     }
     // TODO write en passant 
@@ -78,6 +78,16 @@ public class pawn implements piece {
 //
 //        return MoveType.NONE;
     }
+
+    @Override
+    public  boolean onBoard(int x, int y) {
+        if (x < 0 || x >= 8) {
+            return false;
+        }
+        return y >= 0 && y < 8;
+    }
+
+
     private int getSuit(String piece){
         return piece.charAt(0) <= 90 && piece.charAt(0) >= 65 ? 1 : -1;
     }

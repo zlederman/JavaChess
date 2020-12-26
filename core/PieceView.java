@@ -22,7 +22,7 @@ public class PieceView extends StackPane {
     public PieceView(PieceType type , int x, int y) {
         this.type = type;
         move(x,y);
-        Image img = new Image(ChessApp.fMap.get(type.pieceClass).toString());
+        Image img = new Image(BoardModel.fMap.get(type.pieceClass).toString());
         ImageView iv1 = new ImageView(img);
         iv1.setFitHeight(100);
         iv1.setFitWidth(100);
@@ -43,8 +43,8 @@ public class PieceView extends StackPane {
 
     }
     public void move(int x, int y){
-        this.oldX = x * ChessApp.TILE_SIZE;
-        this.oldY = y * ChessApp.TILE_SIZE;
+        this.oldX = x * GameView.TILE_SIZE;
+        this.oldY = y * GameView.TILE_SIZE;
         relocate(this.oldX, this.oldY);
     }
     public void abort(){
@@ -60,7 +60,11 @@ public class PieceView extends StackPane {
     }
 
     public int toBoard(double pixel){
-        return (int) (pixel + ChessApp.TILE_SIZE/2) / ChessApp.TILE_SIZE;
+        return (int) (pixel + GameView.TILE_SIZE/2) / GameView.TILE_SIZE;
+    }
+
+    public suit getSuit(){
+        return suit.getSuit(Character.toString(type.pieceClass));
     }
 
 
