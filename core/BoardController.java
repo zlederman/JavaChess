@@ -1,9 +1,9 @@
 package core;
 
-import core.pieces.*;
-
-import java.util.Timer;
-import java.util.TimerTask;
+import core.engine.Move;
+import core.engine.MoveType;
+import core.engine.Suit;
+import javafx.application.Platform;
 
 public class BoardController {
     private BoardView boardView;
@@ -16,11 +16,11 @@ public class BoardController {
         this.boardModel = boardModel;
         this.boardView = boardView;
         buildBoard(boardView);
-        startGame();
 
+    }
 
-
-
+    public synchronized void setTileBoard(int row, int col, PieceView p){
+        tileBoard[row][col].setPiece(p);
     }
 
     public int toBoard(double pixel){
@@ -35,8 +35,8 @@ public class BoardController {
                 tileBoard[j][i] = tile;
                 board.getTileGroup().getChildren().add(tile);
                 PieceView piece = null;
-                piece = assignPieceLogic(assignTiles(i,j),j, i);
-                if(piece != null ) {
+                piece = assignPieceLogic(assignTiles(j,i),j, i);
+                if(piece != null) {
                     tile.setPiece(piece);
                     boardView.getPieceGroup().getChildren().add(piece);
                 }
@@ -46,115 +46,140 @@ public class BoardController {
 
     }
 
-    private PieceView assignPieceLogic(PieceType type, int x, int y){
+    public void assignMouseHandler(PieceView p){
+        p.setOnMouseReleased((e)->{
+            int newX = toBoard(p.getLayoutX());
+            int newY = toBoard(p.getLayoutY());
 
-        if(type != null){
-            PieceView p = new PieceView(type, x, y);
-            p.setOnMouseReleased((e)->{
-                int newX = toBoard(p.getLayoutX());
-                int newY = toBoard(p.getLayoutY());
+            int x0 = toBoard(p.getOldX());
+            int y0 = toBoard(p.getOldY());
 
-                int x0 = toBoard(p.getOldX());
-                int y0 = toBoard(p.getOldY());
-
-                switch (tryMove(p,newX,newY)){
-                    case NONE :
-                        p.abort();
-                        break;
-                    case NORMAL :
-                        p.move(newX, newY);
-                        tileBoard[x0][y0].setPiece(null);
-                        tileBoard[newX][newY].setPiece(p);
-                        boardModel.updateBoard(x0,y0,newX, newY);
-                        boardModel.changeTurn();
-
-                        break;
-                    case CAPTURE:
-                        //todo
-
+            switch (tryMove(p, newX, newY)) {
+                case NONE -> p.abort();
+                case NONCAPTURE -> {
+                    updateView(x0, y0, newX, newY, p);
+                    updateModel(x0, y0, newX, newY);
                 }
 
+                case CAPTURE -> {
+                    updateCapture(newX,newY);
+                    updateView(x0, y0, newX, newY, p);
+                    updateModel(x0, y0, newX, newY);
+                }
+            }
+        });
+    }
 
-            });
+    private PieceView assignPieceLogic(PieceType type, int row, int col){
+        if(type != null){
+            PieceView p = new PieceView(type, col, row);
+            assignMouseHandler(p);
             return p;
-
         }
 
         return null;
     }
 
+    public synchronized void updateView(int x0, int y0, int newX, int newY, PieceView p){
+        try{
+            p.move(newX,newY);
+            tileBoard[y0][x0].setPiece(null);
+            tileBoard[newY][newX].setPiece(p);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    public synchronized void updateModel(int x0, int y0, int newX, int newY){
+        boardModel.updateBoard(x0,y0,newX, newY);
+        boardModel.changeTurn();
+    }
+
     public MoveType tryMove(PieceView piece, int newX, int newY){
-        System.out.printf("%s ",boardModel.hasPiece(newX,newY));
-        System.out.printf("%s\n",boardModel.getBoard()[newX][newY]);
-        System.out.printf("%s",boardModel.getCurrentTurn().toString());
+
         try{
             if(boardModel.hasPiece(newX,newY) || !boardModel.getCurrentTurn().equals(piece.getSuit())){
-                return  core.MoveType.NONE;
+                return  MoveType.NONE;
             }
             int x0 = toBoard(piece.getOldX());
             int y0 = toBoard(piece.getOldY());
-            System.out.printf("init location: %d , %d \n",x0, y0);
-            System.out.printf("final location: %d , %d\n",newX, newY);
 
-
-           return  isValid(y0, x0, newY, newX);
+           return  getMoveType(x0, y0, newX, newY);
         }catch(Exception e){
-            return core.MoveType.NONE;
+            e.printStackTrace();
+            return MoveType.NONE;
         }
 
     }
 
-    public void startGame(){
+    public void updateCapture(int x,int y){
+        try{
 
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if(boardModel.bTurn) {
+            boardView.getPieceGroup().getChildren().remove(tileBoard[y][x].getPiece());
+            tileBoard[x][y].setPiece(null);
 
-                    boardModel.makeMove();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+public void startGame(){
+
+        Thread t1  = new Thread(() -> {
+
+            while(true){
+                try{
+                    Thread.sleep(1000);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+                if(boardModel.getCurrentTurn().equals(Suit.BLACK)){
+                    Move botMove =  boardModel.makeMove();
+                    int x0 = botMove.src  % 8;
+                    int y0 = botMove.src / 8;
+                    int yf = botMove.dest / 8;
+                    int xf = botMove.dest % 8;
+                    Platform.runLater(()->{
+
+                        if(botMove.moveType.equals(MoveType.CAPTURE)){
+                            updateCapture(xf,yf);
+                        }
+                        updateView(x0, y0, xf, yf,tileBoard[y0][x0].getPiece());
+
+
+                    });
+                    updateModel(x0, y0, xf, yf);
+
 
                 }
+
+
             }
-        }, 0,5*1000);
-// Since Java-8
 
-    }
+        });
+    t1.start();
 
-
-    public MoveType isValid(int x0, int y0, int xf, int yf){
-        String boardState[][] = boardModel.getBoard();
-        String piece = Character.toString(boardState[x0][y0].charAt(0)).toLowerCase();
-        Integer coords[] = {x0, y0, xf, yf};
-        core.MoveType isValid = MoveType.NONE;
-        System.out.printf("%s",piece);
-        switch (piece.charAt(0)) {
-            case 'r':
-                isValid = new rook().isValid(boardState, coords);
-                break;
-            case 'q':
-                isValid = new queen().isValid(boardState, coords);
-                break;
-    //            case 'k':
-    //                valid  = new king().isValid(coords);
-            case 'n':
-                isValid = new knight().isValid(boardState, coords);
-                break;
-            case 'b':
-                isValid = new bishop().isValid(boardState, coords);
-                break;
-            case 'p':
-                isValid = new pawn().isValid(boardState, coords);
-                break;
-            default:
-                break;
+}
+    public void printTileBoard(){
+        for(int i = 0; i < 8; i++){
+            System.out.printf("ROW %d: ",i);
+            for(int j = 0 ; j < 8; j ++){
+                if(tileBoard[i][j].hasPiece()){
+                    System.out.printf(" %s ",tileBoard[i][j].getPiece().getType().toString());
+                }
+                else{
+                    System.out.print("   .   ");
+                }
+            }
+            System.out.println();
         }
-
-        return isValid;
-
-
     }
-
+    public MoveType getMoveType(int x0, int y0, int xf, int yf){
+        return boardModel.validateMove(x0, y0, xf, yf);
+    }
 
     private PieceType assignTiles(int row, int column){
         if(row == 7 || row == 0){

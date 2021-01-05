@@ -1,5 +1,6 @@
 package core;
 
+import core.engine.Suit;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
@@ -63,8 +64,8 @@ public class PieceView extends StackPane {
         return (int) (pixel + GameView.TILE_SIZE/2) / GameView.TILE_SIZE;
     }
 
-    public suit getSuit(){
-        return suit.getSuit(Character.toString(type.pieceClass));
+    public Suit getSuit(){
+        return Suit.getSuit(Character.toString(type.pieceClass));
     }
 
 

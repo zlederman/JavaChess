@@ -11,7 +11,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = new MenuView();
         MenuController menuController = new MenuController((MenuView) root);
-        primaryStage.setTitle("Hello World");
+        primaryStage.setTitle("Chess");
         primaryStage.setScene(new Scene(root, 800, 800));
         primaryStage.show();
     }

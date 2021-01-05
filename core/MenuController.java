@@ -27,6 +27,7 @@ public class MenuController {
 
        BoardController boardController = new BoardController(game.getBoardView(),boardModel);
        menuView.getScene().setRoot(game);
+       boardController.startGame();
     }
 
     public void setPlayerType(String playerChoice) {
